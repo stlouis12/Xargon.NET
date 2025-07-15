@@ -1,6 +1,5 @@
-﻿using static SDL3.SDL;
-
-namespace Xargon.NET;
+using SDL3;
+using Xargon.NET;
 
 public static class Program
 {
@@ -10,37 +9,37 @@ public static class Program
 
     public static void Main(string[] args)
     {
-        if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_GAMEPAD) < 0)
+        if (!SDL.Init(SDL.InitFlags.Video | SDL.InitFlags.Audio | SDL.InitFlags.Gamepad))
         {
-            Console.WriteLine($"SDL could not initialize! SDL_Error: {SDL_GetError()}");
+            Console.WriteLine($"SDL could not initialize! SDL.Error: {SDL.GetError()}");
             return;
         }
 
-        var window = SDL_CreateWindow(
+        var window = SDL.CreateWindow(
             "Xargon.NET",
             SCREEN_WIDTH * SCREEN_SCALE,
             SCREEN_HEIGHT * SCREEN_SCALE,
-            SDL_WindowFlags.SDL_WINDOW_RESIZABLE
+            SDL.WindowFlags.Resizable
         );
 
         if (window == IntPtr.Zero)
         {
-            Console.WriteLine($"Window could not be created! SDL_Error: {SDL_GetError()}");
-            SDL_Quit();
+            Console.WriteLine($"Window could not be created! SDL.Error: {SDL.GetError()}");
+            SDL.Quit();
             return;
         }
 
-        var renderer = SDL_CreateRenderer(window, null, SDL_RendererFlags.SDL_RENDERER_ACCELERATED | SDL_RendererFlags.SDL_RENDERER_PRESENTVSYNC);
+        var renderer = SDL.CreateRenderer(window, null);
         if (renderer == IntPtr.Zero)
         {
-            Console.WriteLine($"Renderer could not be created! SDL_Error: {SDL_GetError()}");
-            SDL_DestroyWindow(window);
-            SDL_Quit();
+            Console.WriteLine($"Renderer could not be created! SDL.Error: {SDL.GetError()}");
+            SDL.DestroyWindow(window);
+            SDL.Quit();
             return;
         }
         
-        SDL_SetRenderLogicalPresentation(renderer, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_LogicalPresentation.SDL_LOGICAL_PRESENTATION_LETTERBOX, SDL_ScaleMode.SDL_SCALEMODE_NEAREST);
-        SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
+        SDL.SetRenderLogicalPresentation(renderer, SCREEN_WIDTH, SCREEN_HEIGHT, SDL.RendererLogicalPresentation.Letterbox);
+        // SDL.SetHint(SDL.HINT_RENDER_SCALE_QUALITY, "0");  // HINT_RENDER_SCALE_QUALITY appears to be removed in sdl3
 
         try
         {
@@ -49,9 +48,9 @@ public static class Program
         }
         finally
         {
-            SDL_DestroyRenderer(renderer);
-            SDL_DestroyWindow(window);
-            SDL_Quit();
+            SDL.DestroyRenderer(renderer);
+            SDL.DestroyWindow(window);
+            SDL.Quit();
         }
     }
 }

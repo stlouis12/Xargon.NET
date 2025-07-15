@@ -1,10 +1,12 @@
-﻿using System.Numerics;
+using System.Numerics;
 using System.Drawing;
+using Xargon.NET.Graphics;
+using Xargon.NET.Input;
+using Xargon.NET.Audio;
 
 namespace Xargon.NET.GameObjects;
 
 // Base class for all dynamic entities in the game.
-// Replaces the C `objtype` struct and `kindmsg` function pointers.
 public abstract class GameObject
 {
     public int Id { get; set; }
@@ -13,7 +15,6 @@ public abstract class GameObject
     public RectangleF Bounds { get; protected set; }
     public bool IsKilled { get; protected set; }
 
-    // Flags corresponding to original kindflags
     public virtual bool IsWeapon => false;
     public virtual bool IsKillable => false;
 
@@ -22,16 +23,9 @@ public abstract class GameObject
         Position = new Vector2(x, y);
     }
 
-    // Replaces msg_update
     public virtual void Update(float deltaTime, ObjectManager om, InputManager input) { }
-
-    // Replaces msg_draw
     public virtual void Draw(IntPtr renderer, ShapeManager sm, Viewport vp) { }
-
-    // Replaces msg_touch
     public virtual void OnTouch(GameObject other, ObjectManager om) { }
-
-    // Replaces killobj()
     public void Kill() => IsKilled = true;
 }
 
@@ -44,6 +38,13 @@ public class ObjectManager
     private List<GameObject> _objects = new();
     private List<GameObject> _onScreenObjects = new();
     public Player? PlayerObject { get; private set; }
+    public SoundManager SoundManager { get; }
+
+    public ObjectManager(SoundManager soundManager)
+    {
+        SoundManager = soundManager;
+        PlayerObject = new Player(40, 40);
+    }
 
     /// <summary>
     /// Replaces init_objs()
@@ -51,13 +52,9 @@ public class ObjectManager
     public void Initialize()
     {
         _objects.Clear();
-        PlayerObject = new Player(40, 40);
         _objects.Add(PlayerObject);
     }
 
-    /// <summary>
-    /// Replaces the main loop logic from upd_objs()
-    /// </summary>
     public void Update(float deltaTime, Viewport gameViewport, InputManager input)
     {
         // 1. Determine on-screen objects
@@ -69,7 +66,6 @@ public class ObjectManager
 
         foreach (var obj in _objects)
         {
-            // A more robust implementation would check an IsAlwaysActive flag
             if (obj.Bounds.IntersectsWith(screenRect))
             {
                 _onScreenObjects.Add(obj);

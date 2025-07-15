@@ -9,10 +9,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SDL3-cs" Version="1.0.0-preview" />
-    <PackageReference Include="SDL3_image-cs" Version="1.0.0-preview" />
-    <PackageReference Include="SDL3_mixer-cs" Version="1.0.0-preview" />
-    <PackageReference Include="SDL3_ttf-cs" Version="1.0.0-preview" />
+    <PackageReference Include="SDL3-CS" Version="3.2.18" /> 
+    <PackageReference Include="SDL3-CS.Native" Version="3.2.18" /> 
+    <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.4" /> 
+    <PackageReference Include="SDL3-CS.Native.Mixer" Version="2.8.1.1" /> 
+    <PackageReference Include="SDL3-CS.Native.TTF" Version="3.2.2" />
   </ItemGroup>
 
   <ItemGroup>
