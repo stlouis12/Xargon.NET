@@ -1,6 +1,6 @@
-using static SDL3.SDL;
 using System.Runtime.InteropServices;
 using Xargon.NET.Helpers;
+using static SDL3.SDL;
 
 namespace Xargon.NET.Graphics;
 
@@ -8,20 +8,12 @@ public class ShapeManager
 {
     private readonly IntPtr _renderer;
     private readonly Dictionary<int, IntPtr> _textures = new();
-    private byte[] _palette = new byte[256 * 3]; // RGB palette
+    private byte[] _palette = new byte[256 * 3];
 
     [StructLayout(LayoutKind.Sequential, Pack = 1)]
-    private struct ShapeHeader
-    {
-        public short Width;
-        public short Height;
-        public int Offset;
-    }
+    private struct ShapeHeader { public short Width, Height, Offset; }
 
-    public ShapeManager(IntPtr renderer)
-    {
-        _renderer = renderer;
-    }
+    public ShapeManager(IntPtr renderer) => _renderer = renderer;
 
     public void Init(string filename)
     {
@@ -117,9 +109,9 @@ public class ShapeManager
         {
             byte paletteIndex = pixels[i];
             byte* pixel = surfacePixels + (i * 4);
-            if (paletteIndex == 0) // Assuming color 0 is transparent
+            if (paletteIndex == 0) // Assume color 0 is transparent
             {
-                pixel[0] = 0; pixel[1] = 0; pixel[2] = 0; pixel[3] = 0;
+                *(uint*)pixel = 0;
             }
             else
             {
@@ -134,18 +126,11 @@ public class ShapeManager
         return surface;
     }
 
-    public IntPtr GetTexture(int id)
-    {
-        _textures.TryGetValue(id, out var texture);
-        return texture;
-    }
+    public IntPtr GetTexture(int id) => _textures.GetValueOrDefault(id);
 
     public void Cleanup()
     {
-        foreach (var texture in _textures.Values)
-        {
-            DestroyTexture(texture);
-        }
+        foreach (var texture in _textures.Values) DestroyTexture(texture);
         _textures.Clear();
     }
 }

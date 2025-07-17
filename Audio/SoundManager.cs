@@ -1,7 +1,6 @@
 using SDL3;
 using Xargon.NET.Core;
 using System.Runtime.InteropServices;
-//using SDL;
 
 namespace Xargon.NET.Audio;
 
@@ -12,19 +11,20 @@ public class SoundManager
 
     public void Init(string audioFile, ConfigManager config)
     {
-        if (Mixer.Init(Mixer.InitFlags.OGG) < 0)
+        if (Mixer.Init(Mixer.InitFlags.OGG | Mixer.InitFlags.MP3) < 0)
         {
+            Console.Error.WriteLine($"SDL_mixer could not initialize! Error: {SDL.GetError()}");
             return;
         }
 
         if (Mixer.OpenAudio(0, IntPtr.Zero))
         {
-            Console.Error.WriteLine($"SDL_mixer could not open audio! SDL_mixer Error: { SDL.GetError()}");
+            Console.Error.WriteLine($"SDL_mixer could not open audio! Error: {SDL.GetError()}");
             return;
         }
 
         Mixer.AllocateChannels(16);
-        Mixer.VolumeMusic(config.MusicVolume * 128 / 100);
+        Mixer.VolumeMusic(config.MusicVolume * Mixer.MaxVolume / 100);
     }
 
     public void LoadSoundFromVoc(string name, string filePath)
@@ -80,21 +80,6 @@ public class SoundManager
         }
     }
 
-    public void PlaySound(string name)
-    {
-        if (_sfxChunks.TryGetValue(name, out var sfx) && sfx.chunk != IntPtr.Zero)
-        {
-            if (Mixer.PlayChannel(-1, sfx.chunk, 0) == -1)
-            {
-                Console.Error.WriteLine($"Failed to play sound effect! SDL_mixer Error: {SDL.GetError()}");
-            }
-            else
-            {
-                Console.Error.WriteLine($"Sound effect '{name}' not loaded.");
-            }
-        }
-    }
-
     private (byte[] pcmData, byte timeConstant) ParseVocData(byte[] vocBytes)
     {
         // Very basic VOC parser
@@ -135,13 +120,13 @@ public class SoundManager
         return (Array.Empty<byte>(), 0);
     }
 
-    public void PlayTune(string filename)
+    public void PlaySound(string name)
     {
-        StopMusic(); // Stop any existing music
-        // ... Music playback implementation would go here
+        if (_sfxChunks.TryGetValue(name, out var sfx))
+        {
+            Mixer.PlayChannel(-1, sfx.chunk, 0);
+        }
     }
-
-    public void StopMusic() {}
 
     public void Cleanup()
     {

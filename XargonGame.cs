@@ -1,10 +1,11 @@
-﻿using static SDL3.SDL;
+﻿
+using static SDL3.SDL;
 using System.Diagnostics;
 using Xargon.NET.Audio;
 using Xargon.NET.Core;
+using Xargon.NET.GameObjects;
 using Xargon.NET.Graphics;
 using Xargon.NET.Input;
-//using SDL3;
 
 namespace Xargon.NET;
 
@@ -51,7 +52,7 @@ public class XargonGame
     /// <summary>
     /// This method mirrors the initialization sequence from the C main() function.
     /// </summary>
-    public unsafe void Initialize()
+    public void Initialize()
     {
         _configManager.LoadConfig("config.xr1");
         _soundManager.Init("audio.xr1", _configManager);
@@ -59,7 +60,7 @@ public class XargonGame
 
         _shapeManager.Init("graphics.xr1");
         
-        _soundManager.PlayTune("song_0.ogg"); // Note: Converted to .ogg
+        _soundManager.LoadSoundFromVoc("jump", "Assets/jump.voc");
 
         _gameStateManager.InitializeGameData();
     }
@@ -74,7 +75,7 @@ public class XargonGame
         
         while (!_quit)
         {
-            float deltaTime = stopwatch.ElapsedMilliseconds / 1000.0f;
+            var deltaTime = (float)stopwatch.Elapsed.TotalSeconds;
             stopwatch.Restart();
 
             // Handle input
@@ -117,5 +118,6 @@ public class XargonGame
         // Corresponds to the exit routines in main()
         _shapeManager.Cleanup();
         _soundManager.Cleanup();
+        Quit();
     }
 }

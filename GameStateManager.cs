@@ -1,6 +1,6 @@
-﻿using Xargon.NET.Core;
+﻿using Xargon.NET.Audio;
+using Xargon.NET.Core;
 using Xargon.NET.GameObjects;
-using Xargon.NET.Audio;
 using Xargon.NET.Graphics;
 using Xargon.NET.Input;
 using static SDL3.SDL;
@@ -10,26 +10,34 @@ namespace Xargon.NET;
 public class GameStateManager
 {
     private GameFlowState _currentState = GameFlowState.Initializing;
+
     private readonly ConfigManager _configManager;
     private readonly SoundManager _soundManager;
     private readonly ShapeManager _shapeManager;
     private readonly UIManager _uiManager;
-    private ObjectManager _objectManager;
 
-    public bool ShouldQuit { get; private set; } = false;
+    private readonly Board _board;
+    private readonly ObjectManager _objectManager;
+    private readonly Viewport _gameViewport;
+
+    public bool ShouldQuit { get; private set; }
 
     public GameStateManager(ConfigManager configManager, SoundManager soundManager, ShapeManager shapeManager, UIManager uiManager)
     {
         _configManager = configManager;
-        _objectManager = new ObjectManager(soundManager);
         _soundManager = soundManager;
         _shapeManager = shapeManager;
         _uiManager = uiManager;
+
+        _board = new Board(_shapeManager);
+        _objectManager = new ObjectManager(_soundManager, _board);
+        _gameViewport = new Viewport { X = 0, Y = 0, Width = 320, Height = 188 };
     }
 
     public void InitializeGameData()
     {
-        // Load initial game data here (e.g., object lists, level data)
+        _board.LoadBoard("map.xr1");
+        _objectManager.Initialize();
     }
 
     public void SwitchState(GameFlowState state)
@@ -53,7 +61,6 @@ public class GameStateManager
 
     public void Update(float deltaTime, InputManager input)
     {
-        // Update logic based on the current game state
         switch (_currentState)
         {
             case GameFlowState.Initializing:
@@ -61,29 +68,23 @@ public class GameStateManager
                 break;
 
             case GameFlowState.TitleScreen:
-                if (input.IsKeyPressed(Scancode.Space))
-                {
-                    SwitchState(GameFlowState.Playing); // Go to main game for now
-                }
-                if (input.IsKeyPressed(Scancode.Escape))
-                {
-                    ShouldQuit = true;
-                }
+                if (input.IsKeyPressed(Scancode.Space)) SwitchState(GameFlowState.Playing);
+                if (input.IsKeyPressed(Scancode.Escape)) ShouldQuit = true;
                 break;
 
             case GameFlowState.Playing:
-                // Update game logic, player input, etc.
-                if (input.IsKeyPressed(Scancode.Escape))
+                _objectManager.Update(deltaTime, _gameViewport, input);
+                if (_objectManager.PlayerObject != null)
                 {
-                     SwitchState(GameFlowState.TitleScreen); // Go back to title for now
+                    _board.UpdateViewport(_gameViewport, _objectManager.PlayerObject.Position);
                 }
+                if (input.IsKeyPressed(Scancode.Escape)) SwitchState(GameFlowState.TitleScreen);
                 break;
         }
     }
 
     public void Draw(IntPtr renderer)
     {
-        // Drawing logic based on the current game state
         switch (_currentState)
         {
             case GameFlowState.TitleScreen:
@@ -91,11 +92,10 @@ public class GameStateManager
                 break;
 
             case GameFlowState.Playing:
-                 _uiManager.DrawStatusWindow(true);
-                // Draw game world, player, enemies, etc. here
+                _board.Draw(renderer, _gameViewport);
+                _objectManager.Draw(renderer, _shapeManager, _gameViewport);
+                _uiManager.DrawStatusWindow(true);
                 break;
-            
-            // Other states
         }
     }
 }

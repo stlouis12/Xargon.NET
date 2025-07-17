@@ -45,7 +45,7 @@ public class Board
     public Board(ShapeManager shapeManager)
     {
         _shapeManager = shapeManager;
-        _tileInfo = new TileInfo[ushort.MaxValue];
+        _tileInfo = new TileInfo[ushort.MaxValue]; // TODO +1 ?
         LoadTileInfo("tiles.xr1");
     }
 
