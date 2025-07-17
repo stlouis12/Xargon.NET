@@ -1,11 +1,11 @@
-using SDL3;
+using static SDL3.SDL;
 
 namespace Xargon.NET.Input;
 
 public class InputManager
 {
-    private readonly HashSet<SDL.Scancode> _pressedKeys = new();
-    private readonly HashSet<SDL.Scancode> _heldKeys = new();
+    private readonly HashSet<Scancode> _pressedKeys = new();
+    private readonly HashSet<Scancode> _heldKeys = new();
     
     public bool QuitRequested { get; private set; }
 
@@ -16,15 +16,15 @@ public class InputManager
         _pressedKeys.Clear();
         QuitRequested = false;
         
-        while (SDL.PollEvent(out SDL.Event e))
+        while (PollEvent(out Event e))
         {
             switch (e.Type)
             {
-                case (uint)SDL.EventType.Quit:
+                case (uint)EventType.Quit:
                     QuitRequested = true;
                     break;
                 
-                case (uint)SDL.EventType.KeyDown:
+                case (uint)EventType.KeyDown:
                     if (!_heldKeys.Contains(e.Key.Scancode))
                     {
                         _pressedKeys.Add(e.Key.Scancode);
@@ -32,13 +32,13 @@ public class InputManager
                     }
                     break;
 
-                case (uint)SDL.EventType.KeyUp:
+                case (uint)EventType.KeyUp:
                     _heldKeys.Remove(e.Key.Scancode);
                     break;
             }
         }
     }
 
-    public bool IsKeyPressed(SDL.Scancode scancode) => _pressedKeys.Contains(scancode);
-    public bool IsKeyHeld(SDL.Scancode scancode) => _heldKeys.Contains(scancode);
+    public bool IsKeyPressed(Scancode scancode) => _pressedKeys.Contains(scancode);
+    public bool IsKeyHeld(Scancode scancode) => _heldKeys.Contains(scancode);
 }

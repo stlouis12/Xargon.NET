@@ -1,5 +1,5 @@
 using System.Numerics;
-using SDL3;
+using static SDL3.SDL;
 using Xargon.NET.Graphics;
 using Xargon.NET.Input;
 using Xargon.NET.Audio;
@@ -55,8 +55,8 @@ public class Player : GameObject
     {
         // Get input direction
         float moveInput = 0;
-        if (input.IsKeyHeld(SDL.Scancode.Left)) moveInput = -1;
-        if (input.IsKeyHeld(SDL.Scancode.Right)) moveInput = 1;
+        if (input.IsKeyHeld(Scancode.Left)) moveInput = -1;
+        if (input.IsKeyHeld(Scancode.Right)) moveInput = 1;
 
         // Update state machine
         _stateCount += deltaTime;
@@ -96,7 +96,7 @@ public class Player : GameObject
         }
 
         // Handle jumping
-        if (input.IsKeyPressed(SDL.Scancode.LCtrl) || input.IsKeyPressed(SDL.Scancode.Space))
+        if (input.IsKeyPressed(Scancode.LCtrl) || input.IsKeyPressed(Scancode.Space))
         {
             State = PlayerState.Jumping;
             Velocity = new Vector2(Velocity.X, -JumpStrength);
@@ -193,8 +193,8 @@ public class Player : GameObject
         IntPtr texture = sm.GetTexture(shapeId);
         if (texture == IntPtr.Zero) return;
 
-        SDL.GetTextureSize(texture, out float w, out float h);
-        var destRect = new SDL.FRect { X = (int)Position.X, Y = (int)Position.Y, W = w, H = h };
+        GetTextureSize(texture, out float w, out float h);
+        var destRect = new FRect { X = (int)Position.X, Y = (int)Position.Y, W = w, H = h };
         
         // The original game used separate sprites for left/right. A modern approach
         // can use one set and flip them, which saves texture memory.
@@ -203,7 +203,7 @@ public class Player : GameObject
         // var flip = _facingDirection < 0 ? SDL_RendererFlip.SDL_FLIP_HORIZONTAL : SDL_RendererFlip.SDL_FLIP_NONE;
         // SDL_RenderTextureRotated(renderer, texture, IntPtr.Zero, ref destRect, 0, IntPtr.Zero, flip);
 
-        SDL.RenderTexture(renderer, texture, IntPtr.Zero, destRect); 
+        RenderTexture(renderer, texture, IntPtr.Zero, destRect); 
 
         if (IsInvincible())
         {

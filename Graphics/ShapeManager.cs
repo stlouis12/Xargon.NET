@@ -1,4 +1,4 @@
-using SDL3;
+using static SDL3.SDL;
 using System.Runtime.InteropServices;
 using Xargon.NET.Helpers;
 
@@ -84,11 +84,11 @@ public class ShapeManager
 
                 if (surface != IntPtr.Zero)
                 {
-                    IntPtr texture = SDL.CreateTextureFromSurface(_renderer, surface);
-                    SDL.DestroySurface(surface);
+                    IntPtr texture = CreateTextureFromSurface(_renderer, surface);
+                    DestroySurface(surface);
                     if (texture != IntPtr.Zero)
                     {
-                        SDL.SetTextureBlendMode(texture, SDL.BlendMode.Blend);
+                        SetTextureBlendMode(texture, BlendMode.Blend);
                         _textures[shapeIndex] = texture;
                     }
                 }
@@ -103,16 +103,16 @@ public class ShapeManager
 
     private unsafe IntPtr CreateRgbaSurfaceFromPalette(byte[] pixels, int width, int height)
     {
-        IntPtr surface = SDL.CreateSurface(width, height, SDL.PixelFormat.RGBA8888);
+        IntPtr surface = CreateSurface(width, height, PixelFormat.RGBA8888);
         if (surface == IntPtr.Zero) return IntPtr.Zero;
 
-        if (SDL.LockSurface(surface))
+        if (LockSurface(surface))
         {
-            SDL.DestroySurface(surface);
+            DestroySurface(surface);
             return IntPtr.Zero;
         }
 
-        byte* surfacePixels = (byte*)((SDL.Surface*)surface)->Pixels;
+        byte* surfacePixels = (byte*)((Surface*)surface)->Pixels;
         for (int i = 0; i < pixels.Length; i++)
         {
             byte paletteIndex = pixels[i];
@@ -130,7 +130,7 @@ public class ShapeManager
             }
         }
 
-        SDL.UnlockSurface(surface);
+        UnlockSurface(surface);
         return surface;
     }
 
@@ -144,7 +144,7 @@ public class ShapeManager
     {
         foreach (var texture in _textures.Values)
         {
-            SDL.DestroyTexture(texture);
+            DestroyTexture(texture);
         }
         _textures.Clear();
     }

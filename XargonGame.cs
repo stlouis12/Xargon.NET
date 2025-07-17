@@ -1,4 +1,4 @@
-﻿using SDL3;
+﻿using static SDL3.SDL;
 using System.Diagnostics;
 using Xargon.NET.Audio;
 using Xargon.NET.Core;
@@ -103,13 +103,13 @@ public class XargonGame
     private void Render()
     {
         // The original used a black background (color 0)
-        SDL.SetRenderDrawColor(_renderer, 0, 0, 0, 255);
+        SetRenderDrawColor(_renderer, 0, 0, 0, 255);
         
-        SDL.RenderClear(_renderer);
+        RenderClear(_renderer);
 
         _gameStateManager.Draw(_renderer);
 
-        SDL.RenderPresent(_renderer);
+        RenderPresent(_renderer);
     }
 
     private void Cleanup()

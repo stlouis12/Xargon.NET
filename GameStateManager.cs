@@ -1,8 +1,9 @@
 ﻿using Xargon.NET.Core;
+using Xargon.NET.GameObjects;
 using Xargon.NET.Audio;
 using Xargon.NET.Graphics;
 using Xargon.NET.Input;
-using SDL3;
+using static SDL3.SDL;
 
 namespace Xargon.NET;
 
@@ -13,12 +14,14 @@ public class GameStateManager
     private readonly SoundManager _soundManager;
     private readonly ShapeManager _shapeManager;
     private readonly UIManager _uiManager;
+    private ObjectManager _objectManager;
 
     public bool ShouldQuit { get; private set; } = false;
 
     public GameStateManager(ConfigManager configManager, SoundManager soundManager, ShapeManager shapeManager, UIManager uiManager)
     {
         _configManager = configManager;
+        _objectManager = new ObjectManager(soundManager);
         _soundManager = soundManager;
         _shapeManager = shapeManager;
         _uiManager = uiManager;
@@ -58,11 +61,11 @@ public class GameStateManager
                 break;
 
             case GameFlowState.TitleScreen:
-                if (input.IsKeyPressed(SDL.Scancode.Space))
+                if (input.IsKeyPressed(Scancode.Space))
                 {
                     SwitchState(GameFlowState.Playing); // Go to main game for now
                 }
-                if (input.IsKeyPressed(SDL.Scancode.Escape))
+                if (input.IsKeyPressed(Scancode.Escape))
                 {
                     ShouldQuit = true;
                 }
@@ -70,7 +73,7 @@ public class GameStateManager
 
             case GameFlowState.Playing:
                 // Update game logic, player input, etc.
-                if (input.IsKeyPressed(SDL.Scancode.Escape))
+                if (input.IsKeyPressed(Scancode.Escape))
                 {
                      SwitchState(GameFlowState.TitleScreen); // Go back to title for now
                 }
