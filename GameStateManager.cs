@@ -36,7 +36,7 @@ public class GameStateManager
 
     public void InitializeGameData()
     {
-        _board.LoadBoard("map.xr1");
+        _board.LoadBoard("BOARD_01.XR1");
         _objectManager.Initialize();
     }
 
