@@ -42,7 +42,7 @@ public class XargonGame
 
         // Instantiate all the major systems
         _configManager = new ConfigManager();
-        _soundManager = new SoundManager(_configManager);
+        _soundManager = new SoundManager();
         _inputManager = new InputManager();
         _shapeManager = new ShapeManager(_renderer);
         _uiManager = new UIManager(_renderer, _shapeManager);
@@ -55,7 +55,7 @@ public class XargonGame
     public void Initialize()
     {
         _configManager.LoadConfig("config.xr1");
-        _soundManager.PlaySound("Assets\\AUDIO.XR1");
+        _soundManager.Init("audio.xr1", _configManager);
         _inputManager.Init();
 
         _shapeManager.Init("graphics.xr1");
@@ -117,7 +117,7 @@ public class XargonGame
     {
         // Corresponds to the exit routines in main()
         _shapeManager.Cleanup();
-        _soundManager.Dispose();
+        _soundManager.Cleanup();
         Quit();
     }
 }

@@ -10,7 +10,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="OpenTK" Version="4.9.4" />
     <PackageReference Include="SDL3-CS" Version="3.2.18" /> 
     <PackageReference Include="SDL3-CS.Native" Version="3.2.18" /> 
     <PackageReference Include="SDL3-CS.Native.Image" Version="3.2.4" /> 
