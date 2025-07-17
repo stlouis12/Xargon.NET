@@ -1,6 +1,5 @@
-﻿using System.Numerics;
-using System.Runtime.InteropServices;
-using Xargon.NET.GameObjects;
+﻿using System.Drawing;
+using System.Numerics;
 using Xargon.NET.Graphics;
 using Xargon.NET.Helpers;
 using static SDL3.SDL;
@@ -45,7 +44,7 @@ public class Board
     public Board(ShapeManager shapeManager)
     {
         _shapeManager = shapeManager;
-        _tileInfo = new TileInfo[ushort.MaxValue]; // TODO +1 ?
+        _tileInfo = new TileInfo[ushort.MaxValue + 1];
         LoadTileInfo("tiles.xr1");
     }
 
@@ -107,37 +106,49 @@ public class Board
         try
         {
             using var reader = new BinaryReader(File.OpenRead(path));
-            for (int y = 0; y < BOARD_HEIGHT; y++)
+
+            // Calculate the maximum number of tiles we can read from the file.
+            long fileSize = reader.BaseStream.Length;
+            int maxTiles = (int)(fileSize / sizeof(ushort));
+
+            // Determine the actual width and height to read, based on the file size.
+            int width = Math.Min(BOARD_WIDTH, maxTiles / BOARD_HEIGHT);
+            int height = Math.Min(BOARD_HEIGHT, maxTiles / BOARD_WIDTH);
+
+            Console.WriteLine($"Loading board with width={width}, height={height}");
+
+            // Read the tile data.
+            for (int x = 0; x < width; x++)
             {
-                for (int x = 0; x < BOARD_WIDTH; x++)
+                for (int y = 0; y < height; y++)
                 {
-                    // The original board data was likely 16-bit integers.
                     _tileData[x, y] = reader.ReadUInt16();
                 }
             }
-            // The rest of the file contains object data, which is loaded by ObjectManager.
+
+            // TODO: The rest of the stream contains object data which needs to be passed
+            // to the ObjectManager.
+            if (reader.BaseStream.Position < reader.BaseStream.Length) {
+                Console.WriteLine("There seems to be extra data at the end of the file");
+            } else {
+                 Console.WriteLine("Successfully read to end of file stream");
+            }
+
             Console.WriteLine($"Loaded board from {filename}");
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine($"Error loading board {filename}: {ex.Message}");
+            Console.Error.WriteLine($"Error loading board {filename}: {ex.Message}\n{ex.StackTrace}");
             LoadDefaultBoard();
         }
     }
 
     private void LoadDefaultBoard()
     {
-        Console.WriteLine("Board file not found. Using empty default board.");
-        // Initialize an empty board if no file is found
-        for (int x = 0; x < BOARD_WIDTH; x++)
-            for (int y = 0; y < BOARD_HEIGHT; y++)
-                _tileData[x, y] = 0;
+        Console.WriteLine("Board file not found or invalid. Using empty default board.");
+        Array.Clear(_tileData, 0, _tileData.Length);
     }
 
-    /// <summary>
-    /// Updates the viewport position to keep a target (the player) in frame.
-    /// Replaces `calc_scroll()`.
-    /// </summary>
     public void UpdateViewport(Viewport viewport, Vector2 focusPosition)
     {
         int targetX = (int)focusPosition.X - viewport.Width / 2;
@@ -196,7 +207,7 @@ public class Board
 
                 if (texture != IntPtr.Zero)
                 {
-                    FRect destRect = new FRect
+                    var destRect = new FRect
                     {
                         X = x * TILE_SIZE - viewport.X,
                         Y = y * TILE_SIZE - viewport.Y,
